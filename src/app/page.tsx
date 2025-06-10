@@ -1,152 +1,147 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
-import Header from "@/app/components/header";
-import { Edit, Trash2, Plus } from 'lucide-react';
-import Message from "@/app/components/message";
+import React, { useEffect, useState, useCallback } from "react";
 import { TypeCategory } from "@/app/types/TypeCategory";
+import { TypeTopic } from "@/app/types/TypeTopic";
 import showAlert from "@/app/utils/alert";
 import { ApiCategory } from "@/app/api/ApiCategory";
-import { updateRole, renderTextWithLineBreaks } from "@/app/scripts/utils";
+import { ApiTopic } from "@/app/api/ApiTopic";
 import "@/app/styles/formTable.css";
 import "@/app/styles/globals.css";
-import { useRouter } from "next/navigation";
-import Spinner from "@/app/components/spinner";
+import Header from "@/app/components/header";
+import Categories from "./components/categories";
+import Spinner from "./components/spinner";
+import Topics from "./components/topics";
+import Notes from "./components/notes";
 
-export default function Home() {
-  const router = useRouter(); 
-  const [messageVisible, setMessageVisible] = useState(false);
-
+export default function HomePage() {
   const [isAdminOn, setIsAdminOn] = useState<boolean>(false);
   const [categories, setCategories] = useState<TypeCategory[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>("");
+  const [topics, setTopics] = useState<TypeTopic[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fetchCategories = async () => {
+  const [activeCategory, setActiveCategory] = useState<string>("Main Body");
+  const [activeCategoryName, setActiveCategoryName] = useState<string>("Kategorie");
+  const [activeTopic, setActiveTopic] = useState<string | null>(null);
+  const [activeTopicName, setActiveTopicName] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
     try {
-        setCategories(await ApiCategory.fetchCategories());
+      const fetchedCategories = await ApiCategory.fetchCategories();
+      setCategories(fetchedCategories);
+
+      if (activeCategory && activeCategory !== "Main Body") {
+        const fetchedTopics = await ApiTopic.fetchTopics(activeCategory);
+        setTopics(fetchedTopics);
+      } else {
+        setTopics([]);
+      }
+    } catch (err) {
+      showAlert(500, `Server error: ${err}`);
     }
-    catch (err) {
-        showAlert(500, `Server error: ${err}`);
-    }
-  }
+  }, [activeCategory]);
 
   useEffect(() => {
     const init = async () => {
-        setIsLoading(true);
-        const role = updateRole();
-        setIsAdminOn(role);
-        await fetchCategories();
-        setIsLoading(false);
+    setIsLoading(true);
+
+    const storedAdminStatus = sessionStorage.getItem("adminStatus");
+    const isAdmin = storedAdminStatus === "true";
+    setIsAdminOn(isAdmin);
+
+    const storedCatId = sessionStorage.getItem("activeCategory");
+    const storedCatName = sessionStorage.getItem("activeCategoryName");
+    const storedTopId = sessionStorage.getItem("activeTopic");
+    const storedTopName = sessionStorage.getItem("activeTopicName");
+
+    if (storedCatId) setActiveCategory(storedCatId);
+    else sessionStorage.setItem("activeCategory", "Main Body");
+
+    if (storedCatName) setActiveCategoryName(storedCatName);
+    else sessionStorage.setItem("activeCategoryName", "Kategorie");
+
+    if (storedTopId) setActiveTopic(storedTopId);
+    else sessionStorage.removeItem("activeTopic");
+
+    if (storedTopName) setActiveTopicName(storedTopName);
+    else sessionStorage.removeItem("activeTopicName");
+
+    await fetchData();
+      setIsLoading(false);
     };
     init();
-  }, []);
+  }, [fetchData]);
 
-  const handleItemClick = (id: string, name: string) => {
-    setActiveCategory(id);
-    sessionStorage.setItem("activeCategory", id);
-    sessionStorage.setItem("activeCategoryName", name);
-    router.push("/topics");
+  const updateSelection = (
+    catId: string | null,
+    catName: string | null,
+    topId: string | null,
+    topName: string | null
+  ) => {
+    setActiveCategory(catId ?? "Main Body");
+    setActiveCategoryName(catName ?? "Kategorie");
+    setActiveTopic(topId);
+    setActiveTopicName(topName);
+
+    if (catId) sessionStorage.setItem("activeCategory", catId);
+    else sessionStorage.removeItem("activeCategory");
+
+    if (catName) sessionStorage.setItem("activeCategoryName", catName);
+    else sessionStorage.removeItem("activeCategoryName");
+
+    if (topId) sessionStorage.setItem("activeTopic", topId);
+    else sessionStorage.removeItem("activeTopic");
+
+    if (topName) sessionStorage.setItem("activeTopicName", topName);
+    else sessionStorage.removeItem("activeTopicName");
+
+    if (catId && catId !== "Main Body") {
+      ApiTopic.fetchTopics(catId)
+        .then(setTopics)
+        .catch(err => showAlert(500, `Server error: ${err}`));
+    } else {
+      setTopics([]);
+    }
   };
 
-  const handleDelete = async (): Promise<void> => {
-    setMessageVisible(false);
-
-    if (!activeCategory) return;
-
-    setIsLoading(true);
-    try {
-        await ApiCategory.deleteCategory(activeCategory);
-        await fetchCategories();
-    } catch (err) {
-        showAlert(500, `Błąd usuwania: ${err}`);
-    } finally {
-        setIsLoading(false);
-        setActiveCategory("");
-    }
-  }
-
-  const handleEdit = async(id: string, name: string) => {
-    sessionStorage.setItem("activeCategory", id);
-    sessionStorage.setItem("activeCategoryName", name);
-    router.push("/edit");
-  }
-
-  const handleAdd = async() => {
-    router.push("/add");
-  }
-
-  return (<>
-    <Header />
-    <Message
-      visible={messageVisible}
-      setVisible={setMessageVisible}
-      message={`Czy na pewno chcesz usunąć tą kategorię?`}
-      textConfirm={"Tak"}
-      textCancel={"Nie"}
-      onConfirm={handleDelete}
-    />
-    <main>
-        {isLoading ? 
-        <Spinner /> :
-        <div className='form'>
-            {isAdminOn && 
-                <button
-                    className='btnProperty'
-                    onClick={() => {
-                        handleAdd();
-                    }}
-                >
-                    <Plus size={24} />
-                </button>
-            }
-            <div className='formTable no-select'>
-                {categories.map((item) => (
-                <div
-                    className='element'
-                    key={item.id}
-                    onClick={() => {
-                        handleItemClick(item.id, item.name);
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            handleItemClick(item.id, item.name);
-                        }
-                    }}>
-                    <div
-                        id={item.id}
-                        className='text'
-                    >{renderTextWithLineBreaks(item.name)}</div>
-                    {isAdminOn && (
-                    <div className='btnsContent'>
-                        <button
-                            className='btnContent'
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleEdit(item.id, item.name);
-                            }}
-                        >
-                            <Edit size={24} />
-                        </button>
-                        <button
-                            className='btnContent'
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveCategory(item.id);
-                                setMessageVisible(true);
-                            }}
-                            aria-label="Usuń"
-                        >
-                            <Trash2 size={24} />
-                        </button>
-                    </div>
-                    )}
-                </div>
-                ))}
-            </div>
-        </div>}
-    </main>
-  </>);
+  return (
+    <>
+      <Header 
+        categories={categories} 
+        isAdminOn={isAdminOn} 
+        activeCategory={activeCategory}
+        activeCategoryName={activeCategoryName}
+        activeTopic={activeTopic}
+        activeTopicName={activeTopicName}
+        updateSelection={updateSelection}
+      />
+      {isLoading || !categories.length ? (
+        <main>
+          <Spinner />
+        </main>
+      ) : activeCategory === "Main Body" ? (
+        <Categories
+          isAdminOn={isAdminOn}
+          categories={categories}
+          activeCategory={activeCategory}
+          onRefresh={fetchData}
+        />
+      ) : !activeTopic ? (
+        <Topics
+          isAdminOn={isAdminOn}
+          activeCategory={activeCategory}
+          activeCategoryName={activeCategoryName}
+          topics={topics}
+          refreshTopics={fetchData}
+        />
+      ) : (
+        <Notes
+          isAdminOn={isAdminOn}
+          categoryId={activeCategory}
+          topicId={activeTopic}
+          textTitle={activeTopicName || ""}
+        />
+      )}
+    </>
+  );
 }

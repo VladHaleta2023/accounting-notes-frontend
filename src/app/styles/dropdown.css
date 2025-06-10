@@ -7,7 +7,7 @@
 .dropbtn {
   background-color: #2B2B2B;
   border: none;
-  cursor: pointer;
+  cursor: pointer !important;
   user-select: none;
 }
 
@@ -18,16 +18,16 @@
   margin: 5px 0px;
 }
 
-.dropbtn:hover .menuLine {
-  background-color: #577A99;
+.dropbtn .menuLine {
+  background-color: white;
   color: white;
 }
 
 .dropdown-content {
   position: absolute;
   top: 44.5px;
-  left: -15.7px;
-  height: calc(100vh - 60.8px);
+  left: -17px;
+  height: calc(100vh - 60px);
   width: 30vw;
   background-color: #333;
   opacity: 0;
@@ -60,7 +60,7 @@
 }
 
 .dropdown-content div.topic {
-  padding-left: 52px;
+  padding-left: 32px;
 }
 
 .dropdown-content div.element span.dropIcon {
