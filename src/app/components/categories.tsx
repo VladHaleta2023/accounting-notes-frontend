@@ -32,7 +32,7 @@ export default function Categories({
   const handleItemClick = (id: string, name: string) => {
     sessionStorage.setItem("activeCategory", id);
     sessionStorage.setItem("activeCategoryName", name);
-    router.push("/");
+    window.location.reload();
   };
 
   const handleDelete = async (): Promise<void> => {
