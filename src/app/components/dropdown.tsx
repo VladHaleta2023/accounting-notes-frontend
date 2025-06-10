@@ -11,29 +11,21 @@ interface DropdownProps {
     categories: TypeCategories;
 }
 
-export default function Dropdown({
-    categories,
-}: DropdownProps) {
-    const [activeCategory, setActiveCategory] = useState<string | null>("Main Body");
+export default function Dropdown({ categories }: DropdownProps) {
+    const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [activeTopic, setActiveTopic] = useState<string | null>(null);
-    const [activeCategoryName, setActiveCategoryName] = useState<string | null>("Kategorie");
+    const [activeCategoryName, setActiveCategoryName] = useState<string | null>(null);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [openCategories, setOpenCategories] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const storedCategory = sessionStorage.getItem("activeCategory");
         const storedTopic = sessionStorage.getItem("activeTopic");
         const storedCategoryName = sessionStorage.getItem("activeCategoryName");
 
-        if (storedCategory) {
-            setActiveCategory(storedCategory);
-        }
-
-        if (storedTopic) {
-            setActiveTopic(storedTopic);
-        }
-
-        if (storedCategoryName) {
-            setActiveCategoryName(storedCategoryName);
-        }
+        setActiveCategory(storedCategory ?? "Main Body");
+        setActiveTopic(storedTopic ?? null);
+        setActiveCategoryName(storedCategoryName ?? "Kategorie");
     }, []);
 
     useEffect(() => {
@@ -48,20 +40,18 @@ export default function Dropdown({
         }
     }, [activeCategory, activeTopic, activeCategoryName]);
 
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [openCategories, setOpenCategories] = useState<Set<string>>(new Set());
-
-    const handleCategoryClick = (id: string) => {
+    const handleCategoryClick = (id: string, name: string) => {
         const updatedOpenCategories = new Set(openCategories);
         if (updatedOpenCategories.has(id)) {
             updatedOpenCategories.delete(id);
         } else {
             updatedOpenCategories.add(id);
         }
-        
+
         setOpenCategories(updatedOpenCategories);
         setActiveCategory(id);
         setActiveTopic("");
+        setActiveCategoryName(name);
     };
 
     const handleTopicClick = (catId: string, topId: string) => {
@@ -82,10 +72,8 @@ export default function Dropdown({
             </button>
             <div className={`dropdown-content ${isOpen ? "show" : ""}`}>
                 <div
-                    className={`element ${
-                        activeCategory === "Main Body" && !activeTopic ? "active" : ""
-                    }`}
-                    onClick={() => handleCategoryClick("Main Body")}
+                    className={`element ${activeCategory === "Main Body" && !activeTopic ? "active" : ""}`}
+                    onClick={() => handleCategoryClick("Main Body", "Kategorie")}
                 >
                     <span>Kategorie</span>
                 </div>
@@ -93,10 +81,8 @@ export default function Dropdown({
                 {categories.map((category: TypeCategory) => (
                     <React.Fragment key={category.id}>
                         <div
-                            className={`element ${
-                                activeCategory === category.id && !activeTopic ? "active" : ""
-                            }`}
-                            onClick={() => handleCategoryClick(category.id)}
+                            className={`element ${activeCategory === category.id && !activeTopic ? "active" : ""}`}
+                            onClick={() => handleCategoryClick(category.id, category.name ?? "Nieznana")}
                         >
                             <span>{category.name ?? ""}</span>
                             {category.topics.length > 0 && (
@@ -110,9 +96,7 @@ export default function Dropdown({
                                 {category.topics.map((topic) => (
                                     <div
                                         key={topic.id}
-                                        className={`element topic ${
-                                            activeTopic === topic.id ? "active" : ""
-                                        }`}
+                                        className={`element topic ${activeTopic === topic.id ? "active" : ""}`}
                                         onClick={() => handleTopicClick(category.id, topic.id)}
                                     >
                                         <span>{topic.title}</span>
