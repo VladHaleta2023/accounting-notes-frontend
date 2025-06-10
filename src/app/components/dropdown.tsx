@@ -35,9 +35,7 @@ export default function Dropdown({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!visible) {
-        return;
-    }
+    if (!visible) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -60,9 +58,7 @@ export default function Dropdown({
   }, [isOpen, visible]);
 
   const handleCategoryClick = (id: string, name: string) => {
-    if (!visible) {
-        return;
-    }
+    if (!visible) return;
 
     const updatedOpenCategories = new Set(openCategories);
     if (updatedOpenCategories.has(id)) {
@@ -77,27 +73,21 @@ export default function Dropdown({
   };
 
   const handleTopicClick = (catId: string, topicId: string, topicName: string, catName: string) => {
-    if (!visible) {
-        return;
-    }
-    
+    if (!visible) return;
+
     setActiveTopic(catId, topicId, topicName, catName);
 
     router.push("/");
   };
 
   const toggleDropdown = () => {
-    if (!visible) {
-        return;
-    }
+    if (!visible) return;
 
     setIsOpen((prev) => !prev);
   };
 
   useEffect(() => {
-    if (!visible) {
-        return;
-    }
+    if (!visible) return;
 
     const syncWithSession = () => {
       const catId = sessionStorage.getItem("activeCategory");
@@ -111,6 +101,12 @@ export default function Dropdown({
 
       if (topicId && topicName && (!activeTopic || activeTopic !== topicId)) {
         setActiveTopic(catId ?? "", topicId, topicName, catName ?? "");
+
+        setOpenCategories((prev) => {
+          const updated = new Set(prev);
+          if (catId) updated.add(catId);
+          return updated;
+        });
       }
     };
 
@@ -134,23 +130,18 @@ export default function Dropdown({
       >
         <div
           className="menuLine"
-          style={{
-            backgroundColor: `${isOpen ? "#577A99" : "white"}`
-          }}
+          style={{ backgroundColor: isOpen ? "#577A99" : "white" }}
         ></div>
         <div
           className="menuLine"
-          style={{
-            backgroundColor: `${isOpen ? "#577A99" : "white"}`
-          }}
+          style={{ backgroundColor: isOpen ? "#577A99" : "white" }}
         ></div>
         <div
           className="menuLine"
-          style={{
-            backgroundColor: `${isOpen ? "#577A99" : "white"}`
-          }}
+          style={{ backgroundColor: isOpen ? "#577A99" : "white" }}
         ></div>
       </button>
+
       <div className={`dropdown-content ${isOpen ? "show" : ""}`}>
         <div
           className={`element ${activeCategory === "Main Body" && !activeTopic ? "active" : ""}`}
@@ -176,9 +167,16 @@ export default function Dropdown({
               <div className="topics show">
                 {category.topics.map((topic) => (
                   <div
-                    className={`element topic ${activeTopic === topic.id ? "active" : ""}`}
                     key={topic.id}
-                    onClick={() => handleTopicClick(category.id, topic.id, topic.title ?? "Nieznana", category.name ?? "Nieznana")}
+                    className={`element topic ${activeTopic === topic.id ? "active" : ""}`}
+                    onClick={() =>
+                      handleTopicClick(
+                        category.id,
+                        topic.id,
+                        topic.title ?? "Nieznana",
+                        category.name ?? "Nieznana"
+                      )
+                    }
                   >
                     {topic.title ?? ""}
                   </div>
