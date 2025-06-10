@@ -67,7 +67,7 @@ export default function Topics({
   const handleItemClick = (id: string, name: string) => {
     sessionStorage.setItem("activeTopic", id);
     sessionStorage.setItem("activeTopicName", name);
-    router.push("/");
+    window.location.reload();
   };
 
   return (
