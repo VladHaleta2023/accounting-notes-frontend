@@ -115,7 +115,7 @@ export default function HomePage() {
         activeTopicName={activeTopicName}
         updateSelection={updateSelection}
       />
-      {isLoading || !categories.length ? (
+      {isLoading ? (
         <main>
           <Spinner />
         </main>
