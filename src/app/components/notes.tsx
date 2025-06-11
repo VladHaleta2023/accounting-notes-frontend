@@ -24,6 +24,15 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // Восстановление позиции скролла
+  useEffect(() => {
+    const savedScroll = sessionStorage.getItem("scrollY");
+    if (savedScroll) {
+      window.scrollTo(0, parseInt(savedScroll));
+      sessionStorage.removeItem("scrollY");
+    }
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -72,7 +81,8 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
   function exitNotes() {
     sessionStorage.removeItem("activeTopic");
     sessionStorage.removeItem("activeTopicName");
-    window.location.reload();
+    sessionStorage.setItem("scrollY", window.scrollY.toString());
+    router.push("/");
   }
 
   function handleBehavior() {
@@ -80,7 +90,8 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
     if (behaviorTopicId) {
       sessionStorage.setItem("activeTopic", behaviorTopicId);
       sessionStorage.setItem("activeTopicName", notes?.behavior?.title || "");
-      router.refresh();
+      sessionStorage.setItem("scrollY", window.scrollY.toString());
+      router.push(`/notes/${categoryId}/${behaviorTopicId}`);
     }
   }
 
@@ -89,7 +100,8 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
     if (nextTopicId) {
       sessionStorage.setItem("activeTopic", nextTopicId);
       sessionStorage.setItem("activeTopicName", notes?.next?.title || "");
-      router.refresh();
+      sessionStorage.setItem("scrollY", window.scrollY.toString());
+      router.push(`/notes/${categoryId}/${nextTopicId}`);
     }
   }
 
