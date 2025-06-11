@@ -8,30 +8,30 @@
   flex-grow: 1 !important;
 }
 
-.form-notes > textarea.text {
+.form-notes > .text {
   width: 100%;
   border: none;
-  outline: none;
   background-color: transparent;
-  resize: none;
   font-size: 20px;
   line-height: 1.5;
   font-family: inherit;
-  overflow: hidden;
-  word-break: break-word;
+  overflow-wrap: break-word;
   padding: 0;
   margin: 0;
-  height: auto;
   min-height: 24px;
   white-space: pre-wrap;
+  user-select: text;
+  outline: none;
+  resize: none;
+  cursor: text;
 }
 
-.form-notes > textarea.text[readonly] {
-  background-color: transparent;
-  border: none;
-  resize: none;
-  cursor: default;
+.form-notes > .text:empty::before {
+  content: attr(data-placeholder);
+  color: #888;
+  pointer-events: none;
   user-select: none;
+  display: block;
 }
 
 .btnsNotes {
@@ -41,7 +41,7 @@
   margin-bottom: 20px;
 }
 
-.btnsNotes>.btnsProperty {
+.btnsNotes > .btnsProperty {
   display: flex;
 }
 

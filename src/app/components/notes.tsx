@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useEffect, useState, useRef } from "react";
 import { ApiTopic } from "@/app/api/ApiTopic";
 import showAlert from "@/app/utils/alert";
@@ -22,15 +20,7 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
   const [notes, setNotes] = useState<TopicNotes | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    const savedScroll = sessionStorage.getItem("scrollY");
-    if (savedScroll) {
-      window.scrollTo(0, parseInt(savedScroll));
-      sessionStorage.removeItem("scrollY");
-    }
-  }, []);
+  const editableRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -63,18 +53,8 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
   }, [categoryId, topicId]);
 
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      const scrollTopBefore = textarea.scrollTop;
-      const scrollHeightBefore = textarea.scrollHeight;
-
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-
-      const scrollHeightAfter = textarea.scrollHeight;
-      const scrollDiff = scrollHeightAfter - scrollHeightBefore;
-
-      textarea.scrollTop = scrollTopBefore + scrollDiff;
+    if (editableRef.current && editableRef.current.innerText !== textContent) {
+      editableRef.current.innerText = textContent;
     }
   }, [textContent]);
 
@@ -86,8 +66,7 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
   function exitNotes() {
     sessionStorage.removeItem("activeTopic");
     sessionStorage.removeItem("activeTopicName");
-    sessionStorage.setItem("scrollY", window.scrollY.toString());
-    router.push("/");
+    window.location.reload();
   }
 
   function handleBehavior() {
@@ -95,8 +74,7 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
     if (behaviorTopicId) {
       sessionStorage.setItem("activeTopic", behaviorTopicId);
       sessionStorage.setItem("activeTopicName", notes?.behavior?.title || "");
-      sessionStorage.setItem("scrollY", window.scrollY.toString());
-      router.push(`/notes/${categoryId}/${behaviorTopicId}`);
+      router.refresh();
     }
   }
 
@@ -105,8 +83,7 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
     if (nextTopicId) {
       sessionStorage.setItem("activeTopic", nextTopicId);
       sessionStorage.setItem("activeTopicName", notes?.next?.title || "");
-      sessionStorage.setItem("scrollY", window.scrollY.toString());
-      router.push(`/notes/${categoryId}/${nextTopicId}`);
+      router.refresh();
     }
   }
 
@@ -125,12 +102,20 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
                   <ArrowUp size={24} />
                 </button>
                 {notes?.behavior && (
-                  <button className="btnProperty" onClick={handleBehavior} style={{ marginBottom: 0 }}>
+                  <button
+                    className="btnProperty"
+                    onClick={handleBehavior}
+                    style={{ marginBottom: 0 }}
+                  >
                     <ArrowLeft size={24} />
                   </button>
                 )}
                 {notes?.next && (
-                  <button className="btnProperty" onClick={handleNext} style={{ marginBottom: 0 }}>
+                  <button
+                    className="btnProperty"
+                    onClick={handleNext}
+                    style={{ marginBottom: 0 }}
+                  >
                     <ArrowRight size={24} />
                   </button>
                 )}
@@ -145,14 +130,38 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
               <div className="title-notes">{textTitle}</div>
               <hr />
               <div style={{ height: 12 }} />
-              <textarea
-                ref={textareaRef}
+              <div
+                ref={editableRef}
                 className="text"
-                value={textContent}
-                onChange={(e) => setTextContent(e.target.value)}
-                placeholder={isAdminOn ? "Wprowadź notatki..." : ""}
-                wrap="soft"
-                readOnly={!isAdminOn}
+                contentEditable={isAdminOn}
+                suppressContentEditableWarning={true}
+                role="textbox"
+                aria-multiline="true"
+                data-placeholder={isAdminOn ? "Wprowadź notatki..." : ""}
+                onInput={(e) => setTextContent((e.target as HTMLDivElement).innerText)}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  const text = e.clipboardData.getData("text/plain");
+
+                  const selection = window.getSelection();
+                  if (!selection || !selection.rangeCount) return;
+
+                  const range = selection.getRangeAt(0);
+                  range.deleteContents();
+                  const textNode = document.createTextNode(text);
+                  range.insertNode(textNode);
+
+                  range.setStartAfter(textNode);
+                  range.setEndAfter(textNode);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                }}
+                spellCheck={false}
+                style={{
+                  whiteSpace: "pre-wrap",
+                  outline: "none",
+                  cursor: isAdminOn ? "text" : "default",
+                }}
               />
             </div>
           </div>
