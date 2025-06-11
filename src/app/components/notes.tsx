@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState, useRef } from "react";
 import { ApiTopic } from "@/app/api/ApiTopic";
 import showAlert from "@/app/utils/alert";
@@ -53,9 +55,12 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
   }, [categoryId, topicId]);
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const scrollTop = textarea.scrollTop;
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+      textarea.scrollTop = scrollTop;
     }
   }, [textContent]);
 
@@ -103,20 +108,12 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
                   <ArrowUp size={24} />
                 </button>
                 {notes?.behavior && (
-                  <button
-                    className="btnProperty"
-                    onClick={handleBehavior}
-                    style={{ marginBottom: 0 }}
-                  >
+                  <button className="btnProperty" onClick={handleBehavior} style={{ marginBottom: 0 }}>
                     <ArrowLeft size={24} />
                   </button>
                 )}
                 {notes?.next && (
-                  <button
-                    className="btnProperty"
-                    onClick={handleNext}
-                    style={{ marginBottom: 0 }}
-                  >
+                  <button className="btnProperty" onClick={handleNext} style={{ marginBottom: 0 }}>
                     <ArrowRight size={24} />
                   </button>
                 )}
