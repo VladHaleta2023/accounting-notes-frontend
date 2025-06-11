@@ -108,7 +108,7 @@ button.btnProperty:hover, button.btnContent:hover {
 
 .inputCustomText {
     width: 100%;
-    min-height: 125px;
+    min-height: 140px;
     resize: none;
     font-size: 20px;
     padding: 12px;
