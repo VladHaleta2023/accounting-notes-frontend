@@ -24,7 +24,6 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Восстановление позиции скролла
   useEffect(() => {
     const savedScroll = sessionStorage.getItem("scrollY");
     if (savedScroll) {
@@ -66,10 +65,16 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      const scrollTop = textarea.scrollTop;
+      const scrollTopBefore = textarea.scrollTop;
+      const scrollHeightBefore = textarea.scrollHeight;
+
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
-      textarea.scrollTop = scrollTop;
+
+      const scrollHeightAfter = textarea.scrollHeight;
+      const scrollDiff = scrollHeightAfter - scrollHeightBefore;
+
+      textarea.scrollTop = scrollTopBefore + scrollDiff;
     }
   }, [textContent]);
 
