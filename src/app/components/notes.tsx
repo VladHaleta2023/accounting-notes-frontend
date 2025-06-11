@@ -48,8 +48,16 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
         setIsLoading(false);
       }
     }
+
     loadData();
   }, [categoryId, topicId]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [textContent]);
 
   async function saveNotes() {
     if (!topicId || topicId === "") return;
@@ -78,10 +86,6 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
       sessionStorage.setItem("activeTopicName", notes?.next?.title || "");
       router.refresh();
     }
-  }
-
-  function getRowCountFromText(text: string) {
-    return text.split("\n").length || 1;
   }
 
   return (
@@ -127,24 +131,15 @@ export default function Notes({ isAdminOn, categoryId, topicId, textTitle }: Not
               <div className="title-notes">{textTitle}</div>
               <hr />
               <div style={{ height: 12 }} />
-              {isAdminOn ? (
-                <textarea
-                  ref={textareaRef}
-                  className="text"
-                  value={textContent}
-                  onChange={(e) => setTextContent(e.target.value)}
-                  rows={getRowCountFromText(textContent)}
-                  placeholder="Wprowadź notatki..."
-                />
-              ) : (
-                <textarea
-                  ref={textareaRef}
-                  className="text"
-                  value={textContent}
-                  readOnly
-                  rows={getRowCountFromText(textContent)}
-                />
-              )}
+              <textarea
+                ref={textareaRef}
+                className="text"
+                value={textContent}
+                onChange={(e) => setTextContent(e.target.value)}
+                placeholder={isAdminOn ? "Wprowadź notatki..." : ""}
+                wrap="soft"
+                readOnly={!isAdminOn}
+              />
             </div>
           </div>
         </main>

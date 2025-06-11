@@ -1,29 +1,29 @@
 .form-notes {
-    padding: 20px;
-    width: 100%;
-    background-color: white;
-    color: black;
-    font-size: 20px;
-    overflow-y: auto !important;
-    flex-grow: 1 !important;
+  padding: 20px;
+  width: 100%;
+  background-color: white;
+  color: black;
+  font-size: 20px;
+  overflow-y: auto !important;
+  flex-grow: 1 !important;
 }
 
 .form-notes > textarea.text {
-    width: 100%;
-    border: none;
-    outline: none;
-    background-color: transparent;
-    resize: none;
-    font-size: 20px;
-    line-height: 1.5;
-    font-family: inherit;
-    overflow: hidden;
-    white-space: pre-wrap;
-    word-break: break-word;
-    padding: 0;
-    margin: 0;
-    height: auto;
-    min-height: 24px;
+  width: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  resize: none;
+  font-size: 20px;
+  line-height: 1.5;
+  font-family: inherit;
+  overflow: hidden;
+  word-break: break-word;
+  padding: 0;
+  margin: 0;
+  height: auto;
+  min-height: 24px;
+  white-space: pre-wrap;
 }
 
 .form-notes > textarea.text[readonly] {
@@ -35,27 +35,27 @@
 }
 
 .btnsNotes {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .btnsNotes>.btnsProperty {
-    display: flex;
+  display: flex;
 }
 
 .btnSaveNotes {
-    border: none;
-    padding: 10px 16px;
-    font-size: 20px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    width: 120px;
-    max-width: 120px;
-    background-color: #577A99;
-    color: white;
+  border: none;
+  padding: 10px 16px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: 120px;
+  max-width: 120px;
+  background-color: #577A99;
+  color: white;
 }
 
 .btnSaveNotes:hover {
@@ -68,6 +68,6 @@
 }
 
 .title-notes {
-    font-size: 24px !important;
-    font-weight: bold;
+  font-size: 24px !important;
+  font-weight: bold;
 }
